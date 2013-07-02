@@ -46,3 +46,20 @@ asyncTest("Template with single partial", function() {
     start();
   });
 });
+
+asyncTest("Template with single controller", function() {
+  require(["ember", "ehbs!mainWithController"], function() {
+    ok(!!App.testController, "Controller included.");
+    ok(!!Ember.TEMPLATES.mainWithController, "Main template compiled.");
+    start();
+  });
+});
+
+asyncTest("Template with single render", function() {
+  require(["ember", "ehbs!mainWithRender"], function() {
+    ok(!!Ember.TEMPLATES.testRender, "Test render compiled.");
+    ok(!!Ember.TEMPLATES.mainWithRender, "Main template compiled.");
+    start();
+  });
+});
+
