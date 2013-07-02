@@ -55,7 +55,9 @@ require.config({
 ```
 
 Valid options are:
+
 `camel` - `require("ehbs!coolTemplate")` will load `templates/coolTemplate.hbs`
+
 `underscore` - `require("ehbs!coolTemplate")` will load `templates/cool_template.hbs`
 
 ## Tests
