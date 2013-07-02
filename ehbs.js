@@ -1,43 +1,108 @@
 define(["ember"], function (Ember) {
 
   var options = { data: true, stringParams: true };
-  var compiler = new Ember.Handlebars.Compiler();
-  var jsCompiler = new Ember.Handlebars.JavaScriptCompiler();
+  var ignore = [
+    "action",
+    "linkTo"
+  ];
+
   var viewPath = "views/";
   var templatePath = "templates/"; 
   var controllerPath = "controllers/";
   var helperPath = "helpers/";
+  var casing = "camel";
+
+  function _camelOrClass(str) {
+    return str.slice(1).replace(/_[a-z]/g, function(match) {
+      return match.charAt(1).toUpperCase();
+    });
+  }
+
+  function toCamel(str) {
+    return str.charAt(0).toLowerCase() + _camelOrClass(str);
+  }
+
+  function toClass(str) {
+    return str.charAt(0).toUpperCase() + _camelOrClass(str);
+  }
+
+  function toUnderscore(str) {
+    return str.replace(/[A-Z]/g, function(letter, index) {
+      return index === 0 ? letter : "_" + letter.toLowerCase();
+    }).toLowerCase();
+  }
 
   function readConfig(config) {
-    var paths = config.ehbs && config.ehbs.paths;
-    if (paths) {
-      viewPath = paths.views || viewPath;
-      templatePath = paths.templates || templatePath;
-      controllerPath = paths.controllers || controllerPath;
-      helperPath = paths.helpers || helperPath;
+    if (config.ehbs) {
+      var paths = config.ehbs.paths;
+      if (paths) {
+        viewPath = paths.views || viewPath;
+        templatePath = paths.templates || templatePath;
+        controllerPath = paths.controllers || controllerPath;
+        helperPath = paths.helpers || helperPath;
+      }
+      if (config.ehbs.casing) {
+        casing = config.ehbs.casing;
+      }
     }
   }
 
-  function getArgFromStatement(statement) {
+  function getNamespaceAndNameFromStatement(statement) {
     var parts = statement.params[0].string.split(".");
-    return parts.length === 1 ? parts[0] : parts.slice(1).join(".");
+    var namespace;
+    var name;
+
+    if (parts.length === 1) { 
+      namespace = null;
+      name = parts[0];
+    } else {
+      namespace = parts.shift();
+      name = parts.join(".");
+    }
+
+    return [namespace, name];
+  }
+
+  function shouldIgnore(helper, namespace) {
+    if (namespace && namespace == "Ember" || namespace == "Em") {
+      return true;
+    }
+    return ignore.indexOf(helper) !== -1;
   }
 
   function getDeps(ast, parentRequire) {
     var deps = ast.statements.reduce(function(deps, statement) {
-      var string;
+      var helperName = statement.id && statement.id.string;
+      var dep, parts, namespace, arg;
 
       if (statement.isHelper) {
-        string = statement.id.string;
+        parts = getNamespaceAndNameFromStatement(statement);
+        namespace = parts[0];
+        arg = parts[1];
 
-        if (string == "view") {
-          deps.push(viewPath + getArgFromStatement(statement));
-        } else if (string == "partial" || string == "render") {
-          deps.push("ehbs!" + getArgFromStatement(statement));
-        } else if (string == "control") {
-          deps.push(controllerPath + getArgFromStatement(statement));
-        } else {
-          deps.push(helperPath + statement.id.string);
+        if (!shouldIgnore(helperName, namespace)) {
+          if (helperName == "view") {
+            path = viewPath;
+            ext = ".js";
+          } else if (helperName == "partial" || helperName == "render") {
+            path = "ehbs!";
+            ext = "";
+          } else if (helperName == "control") {
+            path = controllerPath;
+            ext = ".js";
+          } else {
+            path = helperPath;
+            arg = statement.id.string;
+            ext = ".js";
+          }
+
+          if (casing === "underscore") {
+            arg = toUnderscore(arg);
+          } else {
+            arg = toClass(arg);
+          }
+
+          deps.push(parentRequire.toUrl(path + arg + ext));
         }
       }
 
@@ -52,14 +117,15 @@ define(["ember"], function (Ember) {
   return {
     load: function(name, parentRequire, onload, config) {
       readConfig(config);
-      require(["text!" + templatePath + name + ".hbs"], function (template) {
+
+      parentRequire([parentRequire.toUrl("text!" + templatePath + name + ".hbs")], function (template) {
         var ast = Ember.Handlebars.parse(template);
         var deps = getDeps(ast, parentRequire);
 
         // This stuff is taken right from Ember.Handlebars.compile()
-        var environment = compiler.compile(ast, options);
-        var templateSpec = jsCompiler.compile(environment, options, undefined, true);
-        Ember.TEMPLATES[name] = Ember.Handlebars.template(templateSpec);
+        var environment = new Ember.Handlebars.Compiler().compile(ast, options);
+        var templateSpec = new Ember.Handlebars.JavaScriptCompiler().compile(environment, options, undefined, true);
+        Ember.TEMPLATES[toCamel(name)] = Ember.Handlebars.template(templateSpec);
 
         if (deps.length) {
           parentRequire(deps, onload);
@@ -70,3 +136,4 @@ define(["ember"], function (Ember) {
     }
   };
 });
+

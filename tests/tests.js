@@ -13,6 +13,9 @@ require.config({
     "handlebars": {
       "exports": "Handlebars"
     }
+  },
+  "ehbs": {
+    "casing": "class"
   }
 });
 

@@ -45,6 +45,19 @@ require.config({
 })
 ```
 
+You can also configure the type of casing used on your files, like so:
+```js
+require.config({
+  ehbs: {
+    casing: "camel"
+  }
+})
+```
+
+Valid options are:
+`camel` - `require("ehbs!coolTemplate")` will load `templates/coolTemplate.hbs`
+`underscore` - `require("ehbs!coolTemplate")` will load `templates/cool_template.hbs`
+
 ## Tests
 Open up `tests/index.html` in your browser.
 
