@@ -30,7 +30,6 @@ define(["ember"], function (Ember) {
       if (statement.isHelper) {
         string = statement.id.string;
 
-        // TODO: get these directories from config instead of hard code
         if (string == "view") {
           deps.push(viewPath + getArgFromStatement(statement));
         } else if (string == "partial" || string == "render") {
