@@ -1,4 +1,4 @@
-define(["ember"], function (Ember) {
+define(["ember"], function () {
 
   var options = { data: true, stringParams: true };
   var ignore = [
