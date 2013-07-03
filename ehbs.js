@@ -12,6 +12,16 @@ define(["ember"], function (Ember) {
   var helperPath = "helpers/";
   var casing = "camel";
 
+  function enforceCase(str) {
+    if (casing === "snake" || casing === "underscore") {
+      return toUnderscore(str);
+    } else if (casing === "class") {
+      return toClass(str);
+    } else {
+      return toCamel(str);
+    }
+  }
+
   function _camelOrClass(str) {
     return str.slice(1).replace(/_[a-z]/g, function(match) {
       return match.charAt(1).toUpperCase();
@@ -96,11 +106,7 @@ define(["ember"], function (Ember) {
             ext = ".js";
           }
 
-          if (casing === "underscore") {
-            arg = toUnderscore(arg);
-          } else {
-            arg = toClass(arg);
-          }
+          arg = enforceCase(arg);
 
           deps.push(parentRequire.toUrl(path + arg + ext));
         }
@@ -118,14 +124,14 @@ define(["ember"], function (Ember) {
     load: function(name, parentRequire, onload, config) {
       readConfig(config);
 
-      parentRequire([parentRequire.toUrl("text!" + templatePath + name + ".hbs")], function (template) {
+      parentRequire(["text!" + parentRequire.toUrl( templatePath + name + ".hbs")], function (template) {
         var ast = Ember.Handlebars.parse(template);
         var deps = getDeps(ast, parentRequire);
 
         // This stuff is taken right from Ember.Handlebars.compile()
         var environment = new Ember.Handlebars.Compiler().compile(ast, options);
         var templateSpec = new Ember.Handlebars.JavaScriptCompiler().compile(environment, options, undefined, true);
-        Ember.TEMPLATES[toCamel(name)] = Ember.Handlebars.template(templateSpec);
+        Ember.TEMPLATES[enforceCase(name)] = Ember.Handlebars.template(templateSpec);
 
         if (deps.length) {
           parentRequire(deps, onload);

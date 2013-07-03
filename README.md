@@ -6,13 +6,13 @@ partials.
 Write an Ember Handlebars template like so:
 
 `templates/index.hbs`
-```html
+```handlebars
 <section>Welcome to my awesome app!</section>
 <div>{{partial login}}</div>
 ```
 
 `templates/login.hbs`
-```html
+```handlebars
 <form>
   {{view Ember.TextField valueBinding="username"}}
   {{view Ember.TextField valueBinding="password" type="password"}}
@@ -56,9 +56,9 @@ require.config({
 
 Valid options are:
 
-`camel` - `require("ehbs!coolTemplate")` will load `templates/coolTemplate.hbs`
-
-`underscore` - `require("ehbs!coolTemplate")` will load `templates/cool_template.hbs`
+* `camel` - `require("ehbs!coolTemplate")` will load `templates/coolTemplate.hbs`
+* `class` - `require("ehbs!coolTemplate")` will load `templates/CoolTemplate.hbs`
+* `underscore` or `snake` - `require("ehbs!coolTemplate")` will load `templates/cool_template.hbs`
 
 ## Tests
 Open up `tests/index.html` in your browser.
