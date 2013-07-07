@@ -1,3 +1,5 @@
+QUnit.config.testTimeout = 2000;
+
 require.config({
   "paths": {
     "jquery": "jquery-1.9.1",

@@ -29,6 +29,14 @@ define(["ember"], function (Ember) {
     }
   }
 
+  function join(uriParts) {
+    var parts = [];
+    uriParts.forEach(function (part) {
+      parts.push.apply(parts, part.split("/"));
+    });
+    return parts.join("/");
+  }
+
   function readConfig(config) {
     if (config.ehbs) {
       var paths = config.ehbs.paths;
@@ -108,7 +116,7 @@ define(["ember"], function (Ember) {
     load: function(name, parentRequire, onload, config) {
       readConfig(config);
 
-      parentRequire(["text!" + parentRequire.toUrl( templatePath + name + ".hbs")], function (template) {
+      parentRequire(["text!" + parentRequire.toUrl(join([templatePath, name + ".hbs"]))], function (template) {
         var ast = Ember.Handlebars.parse(template);
         var deps = getDeps(ast, parentRequire);
 
