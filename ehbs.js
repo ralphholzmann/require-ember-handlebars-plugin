@@ -1,6 +1,9 @@
 define(["ember"], function (Ember) {
 
-  var options = { data: true, stringParams: true };
+  var options = {
+    data: true,
+    stringParams: true
+  };
   var ignore = [
     "action",
     "linkTo"
@@ -12,34 +15,18 @@ define(["ember"], function (Ember) {
   var helperPath = "helpers/";
   var casing = "camel";
 
+  var camelize = Ember.String.camelize;
+  var underscore = Ember.String.underscore;
+  var classify = Ember.String.classify;
+
   function enforceCase(str) {
     if (casing === "snake" || casing === "underscore") {
-      return toUnderscore(str);
+      return underscore(str);
     } else if (casing === "class") {
-      return toClass(str);
+      return classify(str);
     } else {
-      return toCamel(str);
+      return camelize(str);
     }
-  }
-
-  function _camelOrClass(str) {
-    return str.slice(1).replace(/_[a-z]/g, function(match) {
-      return match.charAt(1).toUpperCase();
-    });
-  }
-
-  function toCamel(str) {
-    return str.charAt(0).toLowerCase() + _camelOrClass(str);
-  }
-
-  function toClass(str) {
-    return str.charAt(0).toUpperCase() + _camelOrClass(str);
-  }
-
-  function toUnderscore(str) {
-    return str.replace(/[A-Z]/g, function(letter, index) {
-      return index === 0 ? letter : "_" + letter.toLowerCase();
-    }).toLowerCase();
   }
 
   function readConfig(config) {
@@ -74,10 +61,7 @@ define(["ember"], function (Ember) {
   }
 
   function shouldIgnore(helper, namespace) {
-    if (namespace && namespace == "Ember" || namespace == "Em") {
-      return true;
-    }
-    return ignore.indexOf(helper) !== -1;
+    return (namespace && namespace == "Ember" || namespace == "Em") || ignore.indexOf(helper) !== -1;
   }
 
   function getDeps(ast, parentRequire) {
