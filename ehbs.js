@@ -1,5 +1,7 @@
 define(["ember"], function (Ember) {
 
+  Ember = Ember || window.Ember;
+
   var ignore = Ember.keys(Ember.Handlebars.helpers);
 
   var viewPath = "views/";
@@ -137,5 +139,4 @@ define(["ember"], function (Ember) {
     }
   };
 });
-
 
