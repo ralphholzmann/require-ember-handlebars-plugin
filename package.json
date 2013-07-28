@@ -21,7 +21,7 @@
     "url": "https://github.com/ralphholzmann/require-ember-handlebars-plugin/issues"
   },
   "devDependencies": {
-    "grunt-release": "~0.3.5",
+    "grunt-release": "~0.4.0",
     "grunt": "~0.4.1"
   }
 }

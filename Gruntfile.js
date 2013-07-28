@@ -4,7 +4,8 @@ module.exports = function (grunt) {
   grunt.initConfig({
     release: {
       options: {
-        npm: false
+        npm: false,
+        file: 'bower.json'
       }
     }
   });
