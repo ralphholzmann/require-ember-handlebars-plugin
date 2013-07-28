@@ -1,16 +1,9 @@
 define(["ember"], function (Ember) {
 
-  var options = {
-    data: true,
-    stringParams: true
-  };
-  var ignore = [
-    "action",
-    "linkTo"
-  ];
+  var ignore = Ember.keys(Ember.Handlebars.helpers);
 
   var viewPath = "views/";
-  var templatePath = "templates/"; 
+  var templatePath = "templates/";
   var controllerPath = "controllers/";
   var helperPath = "helpers/";
   var casing = "camel";
@@ -34,7 +27,9 @@ define(["ember"], function (Ember) {
     uriParts.forEach(function (part) {
       parts.push.apply(parts, part.split("/"));
     });
-    return parts.join("/");
+    return parts.filter(function(part) {
+      return !!part;
+    }).join("/");
   }
 
   function readConfig(config) {
@@ -53,19 +48,23 @@ define(["ember"], function (Ember) {
   }
 
   function getNamespaceAndNameFromStatement(statement) {
-    var parts = statement.params[0].string.split(".");
-    var namespace;
-    var name;
+    if (statement.params[0]) {
+      var parts = statement.params[0].string.split(".");
+      var namespace;
+      var name;
 
-    if (parts.length === 1) { 
-      namespace = null;
-      name = parts[0];
+      if (parts.length === 1) {
+        namespace = null;
+        name = parts[0];
+      } else {
+        namespace = parts.shift();
+        name = parts.join(".");
+      }
+
+      return [namespace, name];
     } else {
-      namespace = parts.shift();
-      name = parts.join(".");
+      return [null, statement.id.string];
     }
-
-    return [namespace, name];
   }
 
   function shouldIgnore(helper, namespace) {
@@ -112,18 +111,22 @@ define(["ember"], function (Ember) {
     });
   }
 
+  var compileOptions = {
+    data: true,
+    stringParams: true
+  };
+
   return {
     load: function(name, parentRequire, onload, config) {
       readConfig(config);
-
-      parentRequire(["text!" + parentRequire.toUrl(join([templatePath, name + ".hbs"]))], function (template) {
+      parentRequire(["text!" + join([templatePath, name + ".hbs"])], function (template) {
         var ast = Ember.Handlebars.parse(template);
         var deps = getDeps(ast, parentRequire);
 
         // This stuff is taken right from Ember.Handlebars.compile()
-        var environment = new Ember.Handlebars.Compiler().compile(ast, options);
-        var templateSpec = new Ember.Handlebars.JavaScriptCompiler().compile(environment, options, undefined, true);
-        Ember.TEMPLATES[enforceCase(name)] = Ember.Handlebars.template(templateSpec);
+        var environment = new Ember.Handlebars.Compiler().compile(ast, compileOptions);
+        var templateSpec = new Ember.Handlebars.JavaScriptCompiler().compile(environment, compileOptions, undefined, true);
+        Ember.TEMPLATES[name] = Ember.Handlebars.template(templateSpec);
 
         if (deps.length) {
           parentRequire(deps, onload);
@@ -134,4 +137,5 @@ define(["ember"], function (Ember) {
     }
   };
 });
+
 

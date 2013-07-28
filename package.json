@@ -1,6 +1,6 @@
 {
   "name": "require-ember-handlebars-plugin",
-  "version": "0.0.4",
+  "version": "0.0.3",
   "description": "Require.js plugin for automatic, recursive Handlebars loading for Ember",
   "main": "ehbs.js",
   "directories": {
