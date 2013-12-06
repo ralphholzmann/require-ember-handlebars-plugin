@@ -1,4 +1,4 @@
-define(function(exports) {
+define(["exports"], function(exports) {
   "use strict";
 
   var ignore, camelize, underscore, classify, path, ext;
