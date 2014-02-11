@@ -1,6 +1,7 @@
 define(["exports"], function(exports) {
   "use strict";
 
+  var codeLoadingHelpers = ["view", "template", "render"];
   var ignore, camelize, underscore, classify, path, ext;
 
   var paths = {
@@ -67,17 +68,22 @@ define(["exports"], function(exports) {
     }
   }
 
+  function isIgnoreableNamespace(namespace) {
+    return ["Ember", "Em"].indexOf(namespace) !== -1;
+  }
+
   function shouldIgnore(helper, namespace) {
-    if (namespace) {
-       if (namespace == "Ember" || namespace == "Em") {
-         return true;
-       } else {
-         return false;
-       }
-     } else {
-       return (ignore.indexOf(helper) !== -1);
-     }
-     return true;
+    if (ignore.indexOf(helper) !== -1) {
+      if (codeLoadingHelpers.indexOf(helper) !== -1 && !isIgnoreableNamespace(namespace)) {
+        return false;
+      } else {
+        return true;
+      }
+    } else if (namespace) {
+      return isIgnoreableNamespace(namespace);
+    } else {
+      return false;
+    }
   }
 
   function getDeps(ast, parentRequire) {
