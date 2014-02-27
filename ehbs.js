@@ -69,7 +69,7 @@ define(["exports"], function(exports) {
   }
 
   function isIgnoreableNamespace(namespace) {
-    return ["Ember", "Em"].indexOf(namespace) !== -1;
+    return ["Ember", "Em", null].indexOf(namespace) !== -1;
   }
 
   function shouldIgnore(helper, namespace) {
@@ -184,4 +184,3 @@ define(["exports"], function(exports) {
     write("");
   };
 });
-
