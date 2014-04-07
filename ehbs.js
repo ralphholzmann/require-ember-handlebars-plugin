@@ -99,22 +99,18 @@ define(["exports"], function(exports) {
         if (!shouldIgnore(helperName, namespace)) {
           if (helperName == "view") {
             path = paths.views;
-            ext = ".js";
           } else if (helperName == "partial" || helperName == "render") {
             path = "ehbs!";
-            ext = "";
           } else if (helperName == "control") {
             path = paths.controllers;
-            ext = ".js";
           } else {
             path = paths.helpers;
             arg = statement.id.string;
-            ext = ".js";
           }
 
           arg = enforceCase(arg);
 
-          deps.push(parentRequire.toUrl(path + arg + ext));
+          deps.push(path + arg);
         }
       }
 
