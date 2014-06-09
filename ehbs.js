@@ -108,9 +108,12 @@ define(["exports"], function(exports) {
             arg = statement.id.string;
           }
 
-          arg = enforceCase(arg);
+          path = path.substr(0, path.length - 1);
+          arg.split('.').forEach(function(arg) {
+              path += '/' + enforceCase(arg);
+          });
 
-          deps.push(path + arg);
+          deps.push(path);
         }
       }
 
