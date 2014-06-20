@@ -109,10 +109,14 @@ define(["exports"], function(exports) {
           }
 
           path = path.substr(0, path.length - 1);
-          arg.split('.').forEach(function(arg) {
-              arg = arg.replace(new RegExp(helperName, 'gi'), '');
+          if(helperName != arg) {
+              arg.split('.').forEach(function(arg) {
+                  arg = arg.replace(new RegExp(helperName, 'gi'), '');
+                  path += '/' + enforceCase(arg);
+              });
+          } else {
               path += '/' + enforceCase(arg);
-          });
+          }
 
           deps.push(path);
         }
