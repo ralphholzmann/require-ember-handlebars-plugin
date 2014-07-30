@@ -111,7 +111,7 @@ define(["exports"], function(exports) {
           path = path.substr(0, path.length - 1);
           if(helperName != arg) {
               arg.split('.').forEach(function(arg) {
-                  arg = arg.replace(new RegExp(helperName, 'gi'), '');
+                  arg = arg.replace(new RegExp(helperName + '$', 'i'), '');
                   path += '/' + enforceCase(arg);
               });
           } else {
