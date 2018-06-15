@@ -99,22 +99,26 @@ define(["exports"], function(exports) {
         if (!shouldIgnore(helperName, namespace)) {
           if (helperName == "view") {
             path = paths.views;
-            ext = ".js";
           } else if (helperName == "partial" || helperName == "render") {
             path = "ehbs!";
-            ext = "";
           } else if (helperName == "control") {
             path = paths.controllers;
-            ext = ".js";
           } else {
             path = paths.helpers;
             arg = statement.id.string;
-            ext = ".js";
           }
 
-          arg = enforceCase(arg);
+          path = path.substr(0, path.length - 1);
+          if(helperName != arg) {
+              arg.split('.').forEach(function(arg) {
+                  arg = arg.replace(new RegExp(helperName + '$', 'i'), '');
+                  path += '/' + enforceCase(arg);
+              });
+          } else {
+              path += '/' + enforceCase(arg);
+          }
 
-          deps.push(parentRequire.toUrl(path + arg + ext));
+          deps.push(path);
         }
       }
 
@@ -157,25 +161,31 @@ define(["exports"], function(exports) {
     }
 
     readConfig(config);
-    parentRequire(["text!" + join([paths.templates, path + ".hbs"]), "ember"], function (template, Ember) {
-      // Set these from Ember now.
-      ignore = Ember.keys(Ember.Handlebars.helpers);
-      camelize = Ember.String.camelize;
-      underscore = Ember.String.underscore;
-      classify = Ember.String.classify;
-
-      var ast = Ember.Handlebars.parse(template);
-      var deps = getDeps(ast, parentRequire);
-
-      // This stuff is taken right from Ember.Handlebars.compile()
-      var environment = new Ember.Handlebars.Compiler().compile(ast, compileOptions);
-      var templateSpec = new Ember.Handlebars.JavaScriptCompiler().compile(environment, compileOptions, undefined, true);
-      Ember.TEMPLATES[name] = Ember.Handlebars.template(templateSpec);
-
-      if (deps.length) {
-        parentRequire(deps, onload);
+    parentRequire(["ember"], function (Ember) {
+      if(Ember.TEMPLATES && Ember.TEMPLATES[name]) {
+        return onload();
       } else {
-        onload();
+        parentRequire(["text!" + join([paths.templates, path + ".hbs"])], function (template) {
+          // Set these from Ember now.
+          ignore = Ember.keys(Ember.Handlebars.helpers);
+          camelize = Ember.String.camelize;
+          underscore = Ember.String.underscore;
+          classify = Ember.String.classify;
+
+          var ast = Ember.Handlebars.parse(template);
+          var deps = getDeps(ast, parentRequire);
+
+          // This stuff is taken right from Ember.Handlebars.compile()
+          var environment = new Ember.Handlebars.Compiler().compile(ast, compileOptions);
+          var templateSpec = new Ember.Handlebars.JavaScriptCompiler().compile(environment, compileOptions, undefined, true);
+          Ember.TEMPLATES[name] = Ember.Handlebars.template(templateSpec);
+
+          if (deps.length) {
+            parentRequire(deps, onload);
+          } else {
+            onload();
+          }
+        });
       }
     });
   };
